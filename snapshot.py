@@ -8,6 +8,7 @@ import sys
 def warn(message):
     print(message, file=sys.stderr)
 
+
 def parse_snapshot(filename):
     if filename.startswith("snapshot-"):
         try:
@@ -22,6 +23,10 @@ def parse_snapshot(filename):
 
 def unparse_snapshot(number):
     return "snapshot-" + str(number)
+
+
+def exists(number):
+    return os.path.exists(unparse_snapshot(number))
 
 
 def current_snapshot():
