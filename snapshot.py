@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import os
 import shutil
 import sys
@@ -52,10 +53,28 @@ def get_next_snapshot():
         return current + 1
 
 
-if __name__ == "__main__":
-    target = unparse_snapshot(get_next_snapshot())
+def create_snapshot(number, message):
+    target = unparse_snapshot(number)
     source = "./working"
 
-    print(f"Creating snapshot {target}")
+    if os.path.exists(os.path.join(source, "message")):
+        raise RuntimeError("'message' file exists in 'working/'!")
 
     shutil.copytree(src=source, dst=target)
+    creation_time = datetime.datetime.now().isoformat()
+    message = message + "\n" + creation_time + "\n"
+    with open(os.path.join(target, "message"), "w") as f:
+        f.write(message)
+
+    return message
+
+
+if __name__ == "__main__":
+    target = get_next_snapshot()
+    print("Enter snapshot message: ", end="")
+
+    message = input()
+
+    message = create_snapshot(target, message)
+    print(f"Created snapshot {target}:")
+    print(message, end="")
