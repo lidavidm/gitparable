@@ -58,7 +58,7 @@ def get_next_snapshot():
         return current + 1
 
 
-def create_snapshot(number, message):
+def create_snapshot(number, message, parent_snapshot):
     target = unparse_snapshot(number)
     source = "./working"
 
@@ -67,7 +67,9 @@ def create_snapshot(number, message):
 
     shutil.copytree(src=source, dst=target)
     creation_time = datetime.datetime.now().isoformat()
-    message = message + "\n" + creation_time + "\n"
+    message = message + "\n"
+    message = message + creation_time + "\n"
+    message = message + "Parent: " + str(parent_snapshot) + "\n"
     with open(os.path.join(target, "message"), "w") as f:
         f.write(message)
 
@@ -77,9 +79,24 @@ def create_snapshot(number, message):
 if __name__ == "__main__":
     target = get_next_snapshot()
     print("Enter snapshot message: ", end="")
-
     message = input()
 
-    message = create_snapshot(target, message)
+    if target != 0:
+        print("Enter parent snapshot: ", end="")
+        parent = input()
+        try:
+            parent = int(parent)
+        except ValueError:
+            print("Invalid parent snapshot number.")
+            sys.exit(1)
+
+        if not exists(parent):
+            print("Parent snapshot does not exist.")
+            sys.exit(1)
+    else:
+        # The root commit is its own parent
+        parent = 0
+
+    message = create_snapshot(target, message, parent)
     print(f"Created snapshot {target}:")
     print(message, end="")
