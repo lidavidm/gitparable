@@ -5,8 +5,16 @@ import os
 import shutil
 import sys
 
+
+import branch
+
+
 def warn(message):
     print(message, file=sys.stderr)
+
+
+def unserialize_snapshot(number):
+    return int(number)
 
 
 def parse_snapshot(filename):
@@ -78,10 +86,17 @@ def create_snapshot(number, message, parent_snapshot):
 
 if __name__ == "__main__":
     target = get_next_snapshot()
+    current_branch = branch.current_branch()
+
     print("Enter snapshot message: ", end="")
     message = input()
 
-    if target != 0:
+    if target == 0:
+        # The root commit is its own parent
+        parent = 0
+    elif current_branch:
+        parent = current_branch[1]
+    else:
         print("Enter parent snapshot: ", end="")
         parent = input()
         try:
@@ -93,9 +108,14 @@ if __name__ == "__main__":
         if not exists(parent):
             print("Parent snapshot does not exist.")
             sys.exit(1)
-    else:
-        # The root commit is its own parent
-        parent = 0
+
+    if target == 0:
+        # Create the master branch
+        branch.create_branch("master", target)
+        branch.switch_branch("master")
+    elif current_branch:
+        # Update the current branch (if there is one)
+        branch.update_branch(current_branch[0], target)
 
     message = create_snapshot(target, message, parent)
     print(f"Created snapshot {target}:")

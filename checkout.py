@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 
+import branch
 import snapshot
 
 def checkout(number):
@@ -15,12 +16,18 @@ def checkout(number):
     os.remove(os.path.join(target, "message"))
 
 if __name__ == "__main__":
-    print("Enter snapshot number: ", end="")
+    print("Enter snapshot number or branch name: ", end="")
     number = input()
 
     try:
         number = int(number)
     except ValueError:
+        try:
+            number = branch.switch_branch(number)
+        except ValueError:
+            print("Invalid branch name.")
+            sys.exit(1)
+
         print("Invalid snapshot number.")
         sys.exit(1)
 
